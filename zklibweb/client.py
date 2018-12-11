@@ -1,23 +1,36 @@
 import requests
+import os
 import time
+import sys
+
 from datetime import datetime as dt
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoAlertPresentException, WebDriverException
+from selenium.common.exceptions import NoAlertPresentException, WebDriverException, SessionNotCreatedException
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
 from .domain import Maquine
 from .utils import raw_data
-from .exceptions import ZklibWebNetworkException
+from .exceptions import ZklibWebNetworkException, ZklibWebFirefoxNotFoundException
 
 
 class ZkMaquine:
-    def __init__(self, maquine: Maquine):
+    def __init__(self, maquine: Maquine, headless=True, firefox_path='firefox'):
         self._maquine = maquine
-        self._driver = webdriver.Firefox()
-        self._requests = requests
-        self._is_login = False
+        try:
+            if headless:
+                os.environ['MOZ_HEADLESS'] = '1'
+                binary = FirefoxBinary(firefox_path, log_file=sys.stdout)
+                binary.add_command_line_options('--headless')
+                self._driver = webdriver.Firefox(firefox_binary=binary)
+            else:
+                self._driver = webdriver.Firefox()
+            self._requests = requests
+            self._is_login = False
+        except SessionNotCreatedException as ex:
+            raise ZklibWebFirefoxNotFoundException(ex.msg)
 
     def login(self, timeout=1):
         """
@@ -43,10 +56,10 @@ class ZkMaquine:
             time.sleep(timeout)
             alert = self._driver.switch_to.alert
             alert.accept()
-        except NoAlertPresentException:
+        except NoAlertPresentException as ex:
             self._is_login = True
-        except WebDriverException:
-            raise ZklibWebNetworkException()
+        except WebDriverException as ex:
+            raise ZklibWebNetworkException(ex.msg)
         return self._is_login
 
     def get_uids(self):

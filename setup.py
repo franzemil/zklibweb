@@ -9,7 +9,7 @@ def requirements():
 
 setup(
     name='zklibweb',
-    version='0.1',
+    version='0.3.1',
     description='Library for read data from zklib maquines, using selenium and requests',
     long_description=open('readme.rst').read(),
     url='http://github.com/franzemil/zklibweb',

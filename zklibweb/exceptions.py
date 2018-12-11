@@ -6,3 +6,6 @@ class ZklibWebParceException(ZklibWebException):
 
 class ZklibWebNetworkException(ZklibWebException):
     pass
+
+class ZklibWebFirefoxNotFoundException(ZklibWebException):
+    pass
