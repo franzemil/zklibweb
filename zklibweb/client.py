@@ -106,4 +106,6 @@ class ZkMaquine:
         Close the client
         """
         self._driver.close()
+        self._driver.quit()
+        time.sleep(1)
         self._is_login = False
